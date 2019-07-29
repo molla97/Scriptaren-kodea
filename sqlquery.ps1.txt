@@ -1,0 +1,43 @@
+function Sql-QueryDB
+{
+
+   #Parameters
+
+       param([string]$sqlHost = $null, [string]$sqlInstance = $null, [string]$sqlDBName = $null, [string]$sqlQuery = "")
+
+   if ([string]::IsNullOrEmpty($sqlHost)) {
+       Write-Host "ERROR on DBQuery script : sqlHost parameter is Null or Empty. Current value is '$sqlServer'"
+   	Return $null
+   } 
+
+   if (! $sqlInstance) {
+       Write-Host "ERROR on DBQuery script : sqlInstance parameter is Null. Current value is '$sqlServer'"
+	    Return $null
+   }
+
+   if ([string]::IsNullOrEmpty($sqlQuery)) {
+       Write-Host "ERROR on DBQuery script : SqlQuery parameter is Null or Empty. Current value is '$sqlQuery'"
+	    Return $null    
+   }
+
+   #Connexion
+
+   $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
+   $sqlConnection.ConnectionString = "Server = $sqlHost\$sqlInstance; Database = $sqlDBName; Integrated Security = True; Connect Timeout=30; ApplicationIntent=ReadOnly; Pooling=true"
+
+   $sqlCmd = New-Object System.Data.SqlClient.SqlCommand
+   $sqlCmd.CommandText = $sqlQuery
+   $sqlCmd.Connection = $sqlConnection
+ 
+   $sqlAdapter = New-Object System.Data.SqlClient.SqlDataAdapter
+   $sqlAdapter.SelectCommand = $sqlCmd
+
+   $dataSet = New-Object System.Data.DataSet
+   $sqlAdapter.Fill($dataSet) 
+
+   #Restart parameters
+
+       $sqlQuery = $sqlDBName = $sqlHost = $sqlInstance = ""
+       $sqlAdapter.Dispose()
+   Return $dataSet
+} 
